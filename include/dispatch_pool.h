@@ -84,10 +84,10 @@ namespace guild {
             }
 
             // TODO: 实现此方法
-    //         auto task_ptr = std::make_shared<std::packaged_task<R()>>(
-    //     [f = std::forward<F>(f), args = std::make_tuple(std::forward<Args>(args)...)]() mutable {
-    //         return std::apply(std::move(f), std::move(args));
-    //     }
+    //     auto task_ptr = std::make_shared<std::packaged_task<R()>>(
+    // [f = std::forward<F>(f), args = std::make_tuple(std::forward<Args>(args)...)]() mutable {
+    //     return std::apply(std::move(f), std::move(args));
+    // }
     // );
             auto task_ptr=std::make_shared<std::packaged_task<R()>>(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
             std::future<R> future=task_ptr->get_future();

@@ -11,14 +11,18 @@ namespace guild {
 
     void ExpirySpirit::start() {
         // TODO: 创建后台线程，执行 patrol_loop()
+        if (thread_.joinable()) return;
         thread_=std::thread(&ExpirySpirit::patrol_loop,this);
-        thread_.detach();
+        // thread_.detach();
     }
 
     void ExpirySpirit::stop() {
         // TODO: 停止守护精灵
         stop_flag_.store(true);
         cv_.notify_one();
+        if (thread_.joinable()) {
+            thread_.join();
+        }
     }
 
     ExpirySpirit::~ExpirySpirit() {
@@ -47,14 +51,18 @@ namespace guild {
 
     void StatsDaemon::start() {
         // TODO: 实现启动
+        if (thread_.joinable()) return;
         thread_=std::thread(&StatsDaemon::report_loop,this);
-        thread_.detach();
+        // thread_.detach();
     }
 
     void StatsDaemon::stop() {
         // TODO:
         stop_flag_.store(true);
         cv_.notify_one();
+        if (thread_.joinable()) {
+            thread_.join();
+        }
     }
 
     StatsDaemon::~StatsDaemon() {

@@ -3,6 +3,8 @@
 namespace guild {
     Transaction::Transaction(GuildRegistry &registry, std::mutex &tx_mutex)
         : registry_(registry), tx_mutex_(tx_mutex) {
+        tx_mutex_.lock();  // 立刻加锁，整个事务期间独占
+        locked_ = true;
     }
 
     std::optional<Attribute> Transaction::get(const std::string &key) {
@@ -21,7 +23,7 @@ namespace guild {
     void Transaction::put(const std::string &key, Attribute value) {
         // TODO: 记录到 write_set_
 
-        write_set_.insert({key, value});
+        write_set_[key] = std::move(value);
 
     }
 
@@ -32,7 +34,7 @@ namespace guild {
 
     bool Transaction::commit() {
         if (committed_ || rolled_back_) return false;
-        std::unique_lock lock(tx_mutex_);
+        // std::unique_lock lock(tx_mutex_);
         // TODO: 实现原子提交
         // 基础实现：持全局提交锁，保证 write_set_ 原子写入
         // 同一时刻只有一个事务在提交，不会出现并发 lost update
@@ -48,7 +50,10 @@ namespace guild {
             registry_.register_adventurer(it.first,it.second.value());
         }
         committed_ = true;
-
+        if (locked_) {
+            tx_mutex_.unlock();
+            locked_ = false;
+        }
         return true;
     }
 
@@ -56,7 +61,10 @@ namespace guild {
         if (committed_ || rolled_back_) return;
         write_set_.clear();
         rolled_back_ = true;
-
+        if (locked_) {
+            tx_mutex_.unlock();
+            locked_ = false;
+        }
     }
 
     Transaction::~Transaction() {

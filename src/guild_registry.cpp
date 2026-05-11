@@ -56,6 +56,7 @@ namespace guild {
         {
             Record record;
             record.value=value;
+            record.version = 1;
             if (ttl != 0s) record.expire_at=std::chrono::steady_clock::now()+ttl;
             else record.expire_at=std::chrono::steady_clock::time_point::max();
 

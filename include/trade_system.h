@@ -167,6 +167,7 @@ namespace guild {
         std::any context_; ///< 事务附加信息（std::any 可存储任意类型）
         bool committed_{false};
         bool rolled_back_{false};
+        bool locked_{false};
     };
 
     // ============================================================
